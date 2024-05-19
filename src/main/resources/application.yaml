@@ -1,3 +1,13 @@
 spring:
   application:
     name: crudMusicas
+  datasource:
+    url: jdbc:h2:file:/data/crudMusicas
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+  h2:
+    console.enabled: true
