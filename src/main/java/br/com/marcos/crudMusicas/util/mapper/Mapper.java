@@ -17,7 +17,7 @@ public class Mapper {
 
         musicaDTO.setId(musicaEntity.getId());
         musicaDTO.setTitulo(musicaEntity.getTitulo());
-        musicaDTO.setAnoLancamento(musicaDTO.getAnoLancamento());
+        musicaDTO.setAnoLancamento(musicaEntity.getAnoLancamento());
         musicaDTO.setAutor(musicaEntity.getAutor());
         return musicaDTO;
     }
