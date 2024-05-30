@@ -5,10 +5,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listar Músicas</title>
     <style>
-
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 40%;
+        }
+        button {
+            margin-top: 20px;
+            border: solid #198754 1px;
+            background-color: #198754;
+            color: #FFFFFF;
+            border-radius: 4px;
+            height: 30px;
+            width: 100px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+        button:hover {
+            background-color: #07D977;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        #plus-button-icon {
+            font-weight: 900;
+        }
+        #success-box {
+            background-color: #d1e7dd;
+            border: solid #badbcc 2px;
+            width: 100%;
+            height: 65px;
+            display: flex;
+            justify-content: baseline;
+            align-items: center;
+            border-radius: 5px;
+            padding-left: 15px;
+            margin: 5px 5px;
+        }   
+        #success-message{
+            color: #285532;
+            font-size: 1.5em;
+        }
+        #title {
+            align-self: flex-start;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        #title-empty {
+            align-self: flex-start;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+        table {
+            background-color: #badbcc;
+            width: 100%;
+            color: #FFFFFF;
+            border-collapse: collapse;
+        }
+        table tr {
+            height: 34px;
+        }
+        thead {
+            background-color: #212529;
+        }
+        tbody {
+            color: #000;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #f2f2f2;
+            border-bottom: #dee2e6 solid 2px;
+            border-top: #dee2e6 solid 2px;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #ffffff; 
+        }
+        tr th{
+            text-align: justify;
+            vertical-align: middle;
+        }
+        th:first-child,
+        td:first-child {
+            width: 40px;
+        }
+        tr > td:first-child {
+            text-indent: 5px;
+        }
+        tr > th:first-child {
+            text-indent: 5px;
+        }
+        .vanish {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    TODO: Tela Listar Músicas
+    <main draggable="true">
+        <h1 id="title">Listagem de Músicas</h1>
+        <div id="success-box">
+            <h2 id="success-message">Música incluída com sucesso</h2>
+        </div>
+        <table title="Tabela contendo as músicas salvas no banco de dados">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Artista</th>
+                    <th>Ano lançamento</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button><span id="plus-button-icon">+</span> Incluir novo</button>
+    </main>
+    <script>
+        const table = document.getElementsByTagName('table')[0]
+        const tbody = document.getElementsByTagName('tbody')[0]
+        const main = document.getElementsByTagName('main')[0]
+        const buscarMusicas = async () => {
+            const response = await fetch("http://localhost:8080/musicas", {
+                method: "GET",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            const jsonData = await response.json()
+            const status = response.status
+            return  { jsonData, status }
+        }
+        const listaMusicas = []
+        window.onload = () => {
+            table.classList.add('vanish')
+            buscarMusicas().then(resp => {
+                listaMusicas.push(...resp.jsonData)
+                if(listaMusicas.length > 0) {
+                    for (let i = 0; i < listaMusicas.length; i++) {
+                        const tr = document.createElement("tr")
+                        const tdId = document.createElement("td")
+                        const tdTitulo = document.createElement("td")
+                        const tdArtista = document.createElement("td")
+                        const tdAno = document.createElement("td")
+
+                        tdId.textContent = listaMusicas[i].id
+                        tdTitulo.textContent = listaMusicas[i].titulo
+                        tdArtista.textContent = listaMusicas[i].autor
+                        tdAno.textContent = listaMusicas[i].anoLancamento
+
+                        tr.appendChild(tdId)
+                        tr.appendChild(tdTitulo)
+                        tr.appendChild(tdArtista)
+                        tr.appendChild(tdAno)
+
+                        tbody.appendChild(tr)
+                   }
+                   table.classList.remove('vanish')
+                } else {
+                    const noMusicsH1 = document.createElement('h2')
+                    noMusicsH1.id = 'title-empty'
+                    noMusicsH1.textContent = 'Não há músicas cadastradas'
+                    main.insertBefore(noMusicsH1, main.children[1])
+                }   
+            }).catch(error => alert("Houve um erro ao buscar as músicas: \n" + error))
+        }
+    </script>
 </body>
 </html>
