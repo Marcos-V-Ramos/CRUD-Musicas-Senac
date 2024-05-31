@@ -107,6 +107,15 @@
         .vanish {
             display: none;
         }
+        .apagar-musica {
+            cursor: pointer;
+            color: #FF0000;
+        }
+        .apagar-musica:hover {
+            color: #ef7676;
+            font-size: 18px;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -122,6 +131,8 @@
                     <th>Título</th>
                     <th>Artista</th>
                     <th>Ano lançamento</th>
+                    <th>-</th>
+                    <th>-</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,10 +140,26 @@
         </table>
         <button><span id="plus-button-icon">+</span> Incluir novo</button>
     </main>
-    <script>
+    <script language="javascript">
         const table = document.getElementsByTagName('table')[0]
         const tbody = document.getElementsByTagName('tbody')[0]
         const main = document.getElementsByTagName('main')[0]
+        
+        const listaMusicas = []
+
+        const removerMusicaPorId = async (id, titulo) => {
+            const confirmacao = confirm(`Você tem certeza que deseja remover ${titulo}?`)
+            if (confirmacao) {
+                const response = await fetch(`http://localhost:8080/musicas/${id}`, {
+                    method: "DELETE",
+                    mode: "cors"
+                })
+                response.status !== 204 ? alert("Houve um erro!") : location.reload(true)
+            } else {
+                alert(`${titulo} não será removida.`)
+            }
+        }
+
         const buscarMusicas = async () => {
             const response = await fetch("http://localhost:8080/musicas", {
                 method: "GET",
@@ -145,7 +172,7 @@
             const status = response.status
             return  { jsonData, status }
         }
-        const listaMusicas = []
+        
         window.onload = () => {
             table.classList.add('vanish')
             buscarMusicas().then(resp => {
@@ -153,20 +180,29 @@
                 if(listaMusicas.length > 0) {
                     for (let i = 0; i < listaMusicas.length; i++) {
                         const tr = document.createElement("tr")
+                        
                         const tdId = document.createElement("td")
                         const tdTitulo = document.createElement("td")
                         const tdArtista = document.createElement("td")
                         const tdAno = document.createElement("td")
+                        
+                        const tdAlterar = document.createElement("td")
+                        const tdApagar = document.createElement("td")
 
                         tdId.textContent = listaMusicas[i].id
                         tdTitulo.textContent = listaMusicas[i].titulo
                         tdArtista.textContent = listaMusicas[i].autor
                         tdAno.textContent = listaMusicas[i].anoLancamento
 
+                        tdApagar.textContent = 'APAGAR'
+                        tdApagar.onclick = () => removerMusicaPorId(listaMusicas[i].id, listaMusicas[i].titulo)
+                        tdApagar.classList.add('apagar-musica')
+                        
                         tr.appendChild(tdId)
                         tr.appendChild(tdTitulo)
                         tr.appendChild(tdArtista)
                         tr.appendChild(tdAno)
+                        tr.appendChild(tdApagar)
 
                         tbody.appendChild(tr)
                    }
