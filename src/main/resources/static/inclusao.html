@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Marcos Vinicius Ramos">
     <title>Incluir Música</title>
     <style>
         *{
@@ -119,7 +120,7 @@
             </div>
 
             <div class="buttons">
-                <button id="cancelar" type="reset">Cancelar</button>
+                <button id="cancelar" type="reset" onclick="changePage('listagem.html')">Cancelar</button>
                 <button id="enviar" type="submit">Enviar</button>
             </div>
         </form>
@@ -141,6 +142,10 @@
     const erroSpanTitulo = document.getElementById("span-titulo")
     const erroSpanArtista = document.getElementById("span-artista")
     const erroSpanData = document.getElementById("span-data")
+
+    const changePage = (location) => {
+        window.location.href = location
+    }
 
     const validadeForm = () => {
         const regexAno = /^(18|19|20)\d{2}$/
@@ -177,13 +182,29 @@
         return  { jsonData, status }
     }
 
+    const createFirstAndSecondAddingsLogic = () => {
+        if (localStorage.getItem("length") === null) {
+            localStorage.setItem("length", 1)
+        } else {
+            let length = new Number(localStorage.getItem("length"))
+            localStorage.setItem("length", ++length)
+        }
+        let length = new Number(localStorage.getItem("length"))
+    }
+
     musicaForm.onsubmit = async (event) => {
         event.preventDefault()
         let isValid = validadeForm()
-        isValid ? alert("Informações Válidas. Salvando nova música") : alert("Por favor reveja suas informações.")
-        let musica = new Musica(musicaTitulo.value, musicaArtista.value, musicaData.value)
-        let res = await enviarMusica(musica)
-        res.status === 201 ? alert("Música salva com sucesso! :)") : alert("Houve um erro ao salvar, contate o desenvolvedor :(")
+        if(isValid) {
+            alert("Informações Válidas. Salvando nova música")
+            let musica = new Musica(musicaTitulo.value, musicaArtista.value, musicaData.value)
+            let res = await enviarMusica(musica)
+            res.status === 201 ? alert("Música salva com sucesso! :)") : alert("Houve um erro ao salvar, contate o desenvolvedor :(")
+            window.location.href = 'listagem.html'
+            createFirstAndSecondAddingsLogic()
+        } else {
+            alert("Por favor reveja suas informações.")
+        }
     }
 </script>
 </body>

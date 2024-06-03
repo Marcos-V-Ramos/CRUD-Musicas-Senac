@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Marcos Vinicius Ramos">
     <title>Alterar Música</title>
     <style>
         *{
@@ -126,7 +127,7 @@
             </div>
 
             <div class="buttons">
-                <button id="cancelar">Cancelar</button>
+                <button id="cancelar" onclick="changePage('listagem.html')">Cancelar</button>
                 <button id="enviar" type="submit">Alterar</button>
             </div>
         </form>
@@ -140,6 +141,7 @@
                 this.anoLancamento = data
             }
         }
+
         const inputId = document.getElementById("input-id")
         const inputTitulo = document.getElementById("input-titulo")
         const inputArtista = document.getElementById("input-artista")
@@ -172,6 +174,10 @@
             return isValid
         }
 
+        const changePage = (location) => {
+            window.location.href = location
+        }
+
         const buscarMusicaPorId = async (id) => {
             const response = await fetch(`http://localhost:8080/musicas/${id}`, {
                 method: "GET",
@@ -199,9 +205,11 @@
         }
 
         window.onload = () => {
-            const hash = window.location.hash
+            const queryString = window.location.search
+            const urlParams = new URLSearchParams(queryString)
+            const id = urlParams.get('id')
 
-            buscarMusicaPorId(66).then(resp => {
+            buscarMusicaPorId(id).then(resp => {
                 inputId.value = resp.id
                 inputTitulo.value = resp.titulo
                 inputArtista.value = resp.autor
@@ -216,6 +224,7 @@
                 const musicaAtualizar = new Musica(inputId.value, inputTitulo.value, inputArtista.value, inputData.value)
                 const response = await atualizarMusica(musicaAtualizar)
                 response.status === 200 ? alert(`Música de ID ${inputId.value} atualizada com sucesso!`) : alert("Houve um erro ao atualizar a música!")
+                window.location.href = 'listagem.html'
             } else {
                 alert("Por favor reveja as informações digitadas!")
             }
