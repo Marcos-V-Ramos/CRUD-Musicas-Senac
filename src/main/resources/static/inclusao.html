@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Marcos Vinicius Ramos">
+    <title>Incluir Música</title>
+    <style>
+        *{
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 0px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        button {
+            border-radius: 4px;
+            height: 30px;
+            width: 100px;
+            cursor: pointer;
+        }
+        #cancelar{
+            border: solid #000000 1px;
+            background-color: transparent;
+            
+        }
+        #cancelar:hover {
+            background-color: #D90707;
+        }
+        #enviar:hover {
+            background-color: #07D977;
+        }
+        #enviar {
+            border: solid #198754 1px;
+            background-color: #198754;
+            color: #FFFFFF;
+            margin-left: 15px;
+        }
+        .buttons {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .items {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        main {
+            display: flex;
+            justify-content: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 40%;
+        }
+        form > div{
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #title{
+            align-self: flex-start;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        input {
+            background-color: transparent;
+            border: solid #ced4da 1px;
+            border-radius: 5px;
+            height: 30px;
+            width: 80%;
+            padding: 10px;
+        }
+        label {
+            width: 20%;
+            font-size: 1.1em;
+        }
+        .vanish {
+            display: none;
+        }
+        .appear {
+            display: inline-block;
+            color: #FF0000;
+            font-size: smaller;
+        }
+        .border-input-error{
+            border: solid 2px #FF0000;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <form id="musica-form">
+            <h1 id="title">Inclusão de nova música</h1>
+            <div>
+                <div class="items">
+                    <label for="">Título</label>
+                    <input id="input-titulo" type="text" placeholder="Preencha o título da música" required>
+                </div>
+                <span class="vanish" id="span-titulo">O título deve ter entre 0 e 200 caracteres!</span>
+            </div>
+
+            <div>
+                <div class="items">
+                    <label for="">Artista</label>
+                    <input id="input-artista" type="text" placeholder="Preencha o nome do artista" required>
+                </div>
+                <span class="vanish" id="span-artista">O artista deve ter entre 0 e 150 caracteres!</span>
+            </div>
+
+            <div>
+                <div class="items">
+                    <label for="">Ano de lançamento</label>
+                    <input id="input-data" type="number" placeholder="Preencha o ano de lançamento da música" required>
+                </div>
+                <span class="vanish" id="span-data">A data deve ser válida e estar no formato YYYY!</span>
+            </div>
+
+            <div class="buttons">
+                <button id="cancelar" type="reset" onclick="changePage('listagem.html')">Cancelar</button>
+                <button id="enviar" type="submit">Enviar</button>
+            </div>
+        </form>
+    </main>
+<script>
+    class Musica {
+        constructor(titulo, artista, data) {
+            this.titulo = titulo
+            this.autor = artista
+            this.anoLancamento = data
+        }
+    }
+
+    const musicaForm = document.getElementById("musica-form")
+    const musicaTitulo = document.getElementById("input-titulo")
+    const musicaArtista = document.getElementById("input-artista")
+    const musicaData = document.getElementById("input-data")
+
+    const erroSpanTitulo = document.getElementById("span-titulo")
+    const erroSpanArtista = document.getElementById("span-artista")
+    const erroSpanData = document.getElementById("span-data")
+
+    const changePage = (location) => {
+        window.location.href = location
+    }
+
+    const validadeForm = () => {
+        const regexAno = /^(18|19|20)\d{2}$/
+        let isValid = true
+        if(musicaTitulo.value.length === 0 || musicaTitulo.value.length > 200) {
+            erroSpanTitulo.classList.add("appear")
+            musicaTitulo.classList.add("border-input-error")
+            isValid = false
+        }
+        if(musicaArtista.value.length === 0 || musicaArtista.value.length > 180) {
+            erroSpanArtista.classList.add("appear")
+            musicaArtista.classList.add("border-input-error")
+            isValid = false
+        }
+        if(!regexAno.test(musicaData.value) || parseInt(musicaData.value) > new Date().getFullYear()) {
+            erroSpanData.classList.add("appear")
+            musicaData.classList.add("border-input-error")
+            isValid = false
+        }
+        return isValid
+    }
+
+    const enviarMusica = async (musica) => {
+        const response = await fetch("http://localhost:8080/musicas", {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(musica)
+            })
+        const jsonData = await response.json()
+        const status = response.status
+        return  { jsonData, status }
+    }
+
+    const createFirstAndSecondAddingsLogic = () => {
+        if (localStorage.getItem("length") === null) {
+            localStorage.setItem("length", 1)
+        } else {
+            let length = new Number(localStorage.getItem("length"))
+            localStorage.setItem("length", ++length)
+        }
+        let length = new Number(localStorage.getItem("length"))
+    }
+
+    musicaForm.onsubmit = async (event) => {
+        event.preventDefault()
+        let isValid = validadeForm()
+        if(isValid) {
+            alert("Informações Válidas. Salvando nova música")
+            let musica = new Musica(musicaTitulo.value, musicaArtista.value, musicaData.value)
+            let res = await enviarMusica(musica)
+            res.status === 201 ? alert("Música salva com sucesso! :)") : alert("Houve um erro ao salvar, contate o desenvolvedor :(")
+            window.location.href = 'listagem.html'
+            createFirstAndSecondAddingsLogic()
+        } else {
+            alert("Por favor reveja suas informações.")
+        }
+    }
+</script>
+</body>
+</html>

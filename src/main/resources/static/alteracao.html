@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Marcos Vinicius Ramos">
+    <title>Alterar Música</title>
+    <style>
+        *{
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 0px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        button {
+            border-radius: 4px;
+            height: 30px;
+            width: 100px;
+            cursor: pointer;
+        }
+        #cancelar{
+            border: solid #000000 1px;
+            background-color: transparent;
+            
+        }
+        #cancelar:hover {
+            background-color: #D90707;
+        }
+        #enviar:hover {
+            background-color: #07D977;
+        }
+        #enviar {
+            border: solid #198754 1px;
+            background-color: #198754;
+            color: #FFFFFF;
+            margin-left: 15px;
+        }
+        .buttons {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .items {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        main {
+            display: flex;
+            justify-content: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 40%;
+        }
+        form > div{
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #title{
+            align-self: flex-start;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        input {
+            background-color: transparent;
+            border: solid #ced4da 1px;
+            border-radius: 5px;
+            height: 30px;
+            width: 80%;
+            padding: 10px;
+        }
+        label {
+            width: 20%;
+            font-size: 1.1em;
+        }
+        .vanish {
+            display: none;
+        }
+        .appear {
+            display: inline-block;
+            color: #FF0000;
+            font-size: smaller;
+        }
+        .border-input-error{
+            border: solid 2px #FF0000;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <form id="musica-form">
+            <h1 id="title">Alteração de Música</h1>
+            <div>
+                <div class="items">
+                    <label for="">Id</label>
+                    <input id="input-id" value="" disabled type="number" style="cursor:not-allowed">
+                </div>
+            </div>
+
+            <div>
+                <div class="items">
+                    <label for="">Título</label>
+                    <input id="input-titulo" type="text" placeholder="Preencha o título da música" required>
+                </div>
+                <span class="vanish" id="span-titulo">O título deve ter entre 0 e 200 caracteres!</span>
+            </div>
+
+            <div>
+                <div class="items">
+                    <label for="">Artista</label>
+                    <input id="input-artista" type="text" placeholder="Preencha o nome do artista" required>
+                </div>
+                <span class="vanish" id="span-artista">O artista deve ter entre 0 e 150 caracteres!</span>
+            </div>
+
+            <div>
+                <div class="items">
+                    <label for="">Ano de lançamento</label>
+                    <input id="input-data" type="number" placeholder="Preencha o ano de lançamento da música" required>
+                </div>
+                <span class="vanish" id="span-data">A data deve ser válida e estar no formato YYYY!</span>
+            </div>
+
+            <div class="buttons">
+                <button id="cancelar" onclick="changePage('listagem.html')">Cancelar</button>
+                <button id="enviar" type="submit">Alterar</button>
+            </div>
+        </form>
+    </main>
+    <script lang="javascript">
+        class Musica {
+            constructor(id, titulo, artista, data) {
+                this.id = id
+                this.titulo = titulo
+                this.autor = artista
+                this.anoLancamento = data
+            }
+        }
+
+        const inputId = document.getElementById("input-id")
+        const inputTitulo = document.getElementById("input-titulo")
+        const inputArtista = document.getElementById("input-artista")
+        const inputData = document.getElementById("input-data")
+
+        const erroSpanTitulo = document.getElementById("span-titulo")
+        const erroSpanArtista = document.getElementById("span-artista")
+        const erroSpanData = document.getElementById("span-data")
+
+        const musicaForm = document.getElementById("musica-form")
+
+        const validadeForm = () => {
+            const regexAno = /^(18|19|20)\d{2}$/
+            let isValid = true
+            if(inputTitulo.value.length === 0 || inputTitulo.value.length > 200) {
+                erroSpanTitulo.classList.add("appear")
+                inputTitulo.classList.add("border-input-error")
+                isValid = false
+            }
+            if(inputArtista.value.length === 0 || inputArtista.value.length > 180) {
+                erroSpanArtista.classList.add("appear")
+                inputArtista.classList.add("border-input-error")
+                isValid = false
+            }
+            if(!regexAno.test(inputData.value) || parseInt(inputData.value) > new Date().getFullYear()) {
+                erroSpanData.classList.add("appear")
+                inputData.classList.add("border-input-error")
+                isValid = false
+            }
+            return isValid
+        }
+
+        const changePage = (location) => {
+            window.location.href = location
+        }
+
+        const buscarMusicaPorId = async (id) => {
+            const response = await fetch(`http://localhost:8080/musicas/${id}`, {
+                method: "GET",
+                mode:"cors",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            const jsonData = await response.json()
+            return jsonData
+        }
+
+        const atualizarMusica = async (musica) => {
+            const response = await fetch(`http://localhost:8080/musicas`, {
+                method: "PUT",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(musica)
+            })
+            const jsonData = await response.json()
+            const status = response.status
+            return {jsonData, status}
+        }
+
+        window.onload = () => {
+            const queryString = window.location.search
+            const urlParams = new URLSearchParams(queryString)
+            const id = urlParams.get('id')
+
+            buscarMusicaPorId(id).then(resp => {
+                inputId.value = resp.id
+                inputTitulo.value = resp.titulo
+                inputArtista.value = resp.autor
+                inputData.value = resp.anoLancamento
+            }).catch(ex => alert(`Houve um erro ao realizar a operação! \n ${ex}`))
+        }
+
+        musicaForm.onsubmit = async (event) => {
+            event.preventDefault()
+            const isValid = validadeForm()
+            if (isValid) {
+                const musicaAtualizar = new Musica(inputId.value, inputTitulo.value, inputArtista.value, inputData.value)
+                const response = await atualizarMusica(musicaAtualizar)
+                response.status === 200 ? alert(`Música de ID ${inputId.value} atualizada com sucesso!`) : alert("Houve um erro ao atualizar a música!")
+                window.location.href = 'listagem.html'
+            } else {
+                alert("Por favor reveja as informações digitadas!")
+            }
+        }
+    </script>
+</body>
+</html>
