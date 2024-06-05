@@ -1,6 +1,8 @@
 package br.com.marcos.crudMusicas.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -16,12 +18,16 @@ public class MusicaEntity implements Serializable {
     private Long id;
 
     @Column(name = "titulo", nullable = false, length = 200)
+    @Size(min = 1, max = 200, message = "O campo titulo deve ter entre 1 e 200 caracteres")
     private String titulo;
 
     @Column(name = "autor", nullable = false, length = 150)
+    @Size(min = 1, max = 150, message = "O campo autor deve ter entre 1 e 150 caracteres.")
     private String autor;
 
     @Column(name = "data", nullable = false, length = 4)
+    @Size(min = 4, max = 4, message = "O campo de data deve estar no formato YYYY.")
+    @Pattern(regexp = "\\d{4}", message = "O campo de ano deve estar no formato YYYY")
     private String anoLancamento;
 
     public MusicaEntity() {
